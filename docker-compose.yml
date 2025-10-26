@@ -1,0 +1,72 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: milescar_postgres
+    environment:
+      POSTGRES_DB: milescarrental
+      POSTGRES_USER: milesadmin
+      POSTGRES_PASSWORD: MilesCarSecure2024!
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+    restart: unless-stopped
+
+  seq:
+    image: datalust/seq:latest
+    container_name: milescar_seq
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_ADMINPASSWORD: "ChangeMe123!"
+    ports:
+      - "5341:5341" # ingestion endpoint used by Serilog
+      - "8081:80"   # web UI
+    networks:
+      - api_network
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    container_name: milescar_redis
+    command: redis-server --requirepass RedisSecure2024! --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - api_network
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: .dockerfile
+    container_name: search_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=80
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=milescarrental;Username=milesadmin;Password=MilesCarSecure2024!
+      - Seq__ServerUrl=http://seq:5341
+      - SEQ_URL=http://seq:5341
+      - ConnectionStrings__Redis=redis:6379,password=RedisSecure2024!
+    ports:
+        - "8080:80"
+    depends_on:
+      - postgres
+    networks:
+      - api_network
+      - db_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  api_network:
+    driver: bridge
+  db_network:
+    driver: bridge

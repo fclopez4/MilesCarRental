@@ -1,0 +1,8 @@
+.vs/
+CarRentalSearch.Api/bin/
+CarRentalSearch.Api/obj/
+CarRentalSearch.Domain/bin/
+CarRentalSearch.Domain/obj/
+CarRentalSearch.Infrastructure/bin/
+CarRentalSearch.Infrastructure/obj/
+
