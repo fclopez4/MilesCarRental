@@ -16,6 +16,7 @@ public static class DbSeeder
         try
         {
             logger.LogInformation("Starting database seeding...");
+            context.Database.Migrate();
 
             // Markets
             if (!await context.Markets.AnyAsync())

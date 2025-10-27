@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalSearch.Infrastruct
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalSearch.Application", "CarRentalSearch.Application\CarRentalSearch.Application.csproj", "{845BC2F1-7E97-4409-9A29-82544D9487D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalSearch.Test", "CarRentalSearch.Test\CarRentalSearch.Test.csproj", "{A35E1269-0F81-7718-21CA-D0B123781D98}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{845BC2F1-7E97-4409-9A29-82544D9487D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{845BC2F1-7E97-4409-9A29-82544D9487D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{845BC2F1-7E97-4409-9A29-82544D9487D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A35E1269-0F81-7718-21CA-D0B123781D98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A35E1269-0F81-7718-21CA-D0B123781D98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A35E1269-0F81-7718-21CA-D0B123781D98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A35E1269-0F81-7718-21CA-D0B123781D98}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

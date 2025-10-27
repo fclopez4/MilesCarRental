@@ -11,6 +11,13 @@ public class VehiclesController : ControllerBase
     private readonly IVehicleSearchService _vehicleSearchService;
     private readonly ILogger<VehiclesController> _logger;
 
+    [HttpGet("health")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult HealthCheck()
+    {
+        return Ok("Healthy");
+    }
+
     public VehiclesController(
         IVehicleSearchService vehicleSearchService,
         ILogger<VehiclesController> logger)

@@ -110,11 +110,12 @@ public class Program
         // Security
         app.UseHttpsRedirection();
 
-        // Routing root endpoint
-        app.MapGet("/", () => "Miles Car Rental Search API")
-            .WithName("Root")
-            .WithOpenApi();
-        
+        app.MapGet("/", context =>
+        {
+            context.Response.Redirect("/swagger");
+            return Task.CompletedTask;
+        });
+
         app.MapControllers();
 
         // Database Initialization
