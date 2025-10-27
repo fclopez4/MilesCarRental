@@ -7,3 +7,5 @@ CarRentalSearch.Domain/bin/
 CarRentalSearch.Domain/obj/
 CarRentalSearch.Infrastructure/bin/
 CarRentalSearch.Infrastructure/obj/
+CarRentalSearch.Test/bin/
+CarRentalSearch.Test/obj/
