@@ -18,6 +18,7 @@ C4Container
     title Diagrama de Contenedores - Sistema MilesCar Rental
 
     Person(user, "Usuario", "Cliente que utiliza el sistema de renta de autos")
+    Person(admin, "Administrador", "Gestiona logs y monitoreo del sistema")
     
     System_Boundary(milescar, "MilesCar Rental System") {
         Container(api, "Search API", "ASP.NET Core", "API REST que proporciona funcionalidad de búsqueda y gestión de rentas de vehículos")
@@ -27,6 +28,7 @@ C4Container
     }
 
     Rel(user, api, "Realiza peticiones HTTP", "HTTPS/REST :8080")
+    Rel(admin, seq, "Consulta logs", "HTTPS :8081")
     
     Rel(api, postgres, "Lee/Escribe datos", "PostgreSQL Protocol :5432")
     Rel(api, redis, "Lee/Escribe cache", "Redis Protocol :6379")
@@ -57,5 +59,5 @@ Mapping to docker-compose services:
 1. Clone the repository.
 2. Run `docker-compose up` to start the application.
 3. Access the API at `http://localhost:8080/swagger/index.html`.
-3. Access the monitor logs at `http://localhost:8081/#/login`.
+3. Access the monitor logs at `http://localhost:8081/#/login` with admin.
 
