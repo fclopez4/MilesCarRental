@@ -1,5 +1,5 @@
-using CarRentalSearch.Api.Application.DTOs;
-using CarRentalSearch.Api.Application.Services;
+using CarRentalSearch.Application.DTOs;
+using CarRentalSearch.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarRentalSearch.Api.Controllers;

@@ -4,6 +4,7 @@ WORKDIR /src
 
 # Copiar los archivos del proyecto y restaurar dependencias
 COPY CarRentalSearch.Api/CarRentalSearch.Api.csproj CarRentalSearch.Api/
+COPY CarRentalSearch.Application/CarRentalSearch.Application.csproj CarRentalSearch.Application/
 COPY CarRentalSearch.Domain/CarRentalSearch.Domain.csproj CarRentalSearch.Domain/
 COPY CarRentalSearch.Infrastructure/CarRentalSearch.Infrastructure.csproj CarRentalSearch.Infrastructure/
 COPY CarRentalSearch.sln ./

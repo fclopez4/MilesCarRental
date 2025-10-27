@@ -2,7 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using CarRentalSearch.Infrastructure.Data;
 using CarRentalSearch.Infrastructure.Repositories;
-using CarRentalSearch.Api.Application.Services;
+using CarRentalSearch.Infrastructure.Services;
+using CarRentalSearch.Application.Services;
 using CarRentalSearch.Domain.Repositories;
 
 namespace CarRentalSearch.Api;
@@ -94,6 +95,7 @@ public class Program
         builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 
         // Application Services
+        builder.Services.AddScoped<ICacheService, RedisCacheService>();
         builder.Services.AddScoped<IVehicleSearchService, VehicleSearchService>();
     }
 

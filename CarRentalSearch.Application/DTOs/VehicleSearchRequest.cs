@@ -1,4 +1,4 @@
-namespace CarRentalSearch.Api.Application.DTOs;
+namespace CarRentalSearch.Application.DTOs;
 
 public record VehicleSearchRequest(
     string PickupLocation,

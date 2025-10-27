@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CarRentalSearch.Application\CarRentalSearch.Application.csproj" />
     <ProjectReference Include="..\CarRentalSearch.Domain\CarRentalSearch.Domain.csproj" />
     <ProjectReference Include="..\CarRentalSearch.Infrastructure\CarRentalSearch.Infrastructure.csproj" />
   </ItemGroup>

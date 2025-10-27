@@ -1,7 +1,8 @@
-using CarRentalSearch.Api.Application.DTOs;
+using CarRentalSearch.Application.DTOs;
 using CarRentalSearch.Domain.Repositories;
+using Microsoft.Extensions.Logging;
 
-namespace CarRentalSearch.Api.Application.Services;
+namespace CarRentalSearch.Application.Services;
 
 public interface IVehicleSearchService
 {
@@ -12,23 +13,37 @@ public class VehicleSearchService : IVehicleSearchService
 {
     private readonly IVehicleRepository _vehicleRepository;
     private readonly ILocationRepository _locationRepository;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<VehicleSearchService> _logger;
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(15);
 
     public VehicleSearchService(
         IVehicleRepository vehicleRepository,
         ILocationRepository locationRepository,
+        ICacheService cacheService,
         ILogger<VehicleSearchService> logger)
     {
         _vehicleRepository = vehicleRepository;
         _locationRepository = locationRepository;
+        _cacheService = cacheService;
         _logger = logger;
     }
 
     public async Task<VehicleSearchResponse> SearchVehiclesAsync(VehicleSearchRequest request)
     {
-        _logger.LogInformation("Searching for vehicles. Pickup: {PickupLocation}, Dropoff: {DropoffLocation}",
-            request.PickupLocation, request.DropoffLocation);
+        var cacheKey = GenerateCacheKey(request);
+        
+        // Try to get from cache first
+        var cachedResponse = await _cacheService.GetAsync<VehicleSearchResponse>(cacheKey);
+        if (cachedResponse != null)
+        {
+            _logger.LogInformation("Cache hit for vehicle search. Key: {CacheKey}", cacheKey);
+            return cachedResponse;
+        }
 
+        _logger.LogInformation("Cache miss for vehicle search. Key: {CacheKey}", cacheKey);
+
+        // Get locations
         var pickupLocation = await _locationRepository.GetLocationByCityAsync(request.PickupLocation);
         if (pickupLocation == null)
         {
@@ -67,7 +82,18 @@ public class VehicleSearchService : IVehicleSearchService
             )
         )).ToList();
 
+        var response = new VehicleSearchResponse(vehicleDtos);
+        
+        // Cache the response
+        await _cacheService.SetAsync(cacheKey, response, CacheDuration);
+
         _logger.LogInformation("Found {Count} available vehicles", vehicleDtos.Count);
-        return new VehicleSearchResponse(vehicleDtos);
+        return response;
     }
+
+    private static string GenerateCacheKey(VehicleSearchRequest request)
+    {
+        return $"vehicle_search:{request.PickupLocation}:{request.DropoffLocation}";
+    }
+
 }
