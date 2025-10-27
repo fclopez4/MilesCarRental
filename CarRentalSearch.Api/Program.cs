@@ -5,82 +5,119 @@ using CarRentalSearch.Infrastructure.Repositories;
 using CarRentalSearch.Api.Application.Services;
 using CarRentalSearch.Domain.Repositories;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace CarRentalSearch.Api;
 
-// Configure Seq URL (from config or environment). Default to docker-compose service name + port.
-var seqUrl = builder.Configuration["Seq:ServerUrl"]
-             ?? Environment.GetEnvironmentVariable("SEQ_URL")
-             ?? throw new InvalidOperationException("Seq log connection not found.");;
-
-// Setup Serilog
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.Seq(seqUrl)
-    .CreateLogger();
-
-builder.Host.UseSerilog();
-
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// Add PostgreSQL database context
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-    
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
-
-// Register repositories
-builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
-builder.Services.AddScoped<ILocationRepository, LocationRepository>();
-
-// Register application services
-builder.Services.AddScoped<IVehicleSearchService, VehicleSearchService>();
-
-// Add Redis distributed cache
-var redisConnection = builder.Configuration.GetConnectionString("Redis") 
-    ?? throw new InvalidOperationException("Connection string 'Redis' not found.");
-builder.Services.AddStackExchangeRedisCache(options =>
+public class Program
 {
-    options.Configuration = redisConnection;
-    options.InstanceName = "MilesCarRental_";
-});
+    public static async Task Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
 
-var app = builder.Build();
+        ConfigureLogging(builder);
+        ConfigureServices(builder);
+        
+        var app = builder.Build();
+        
+        try
+        {
+            await ConfigureApplication(app);
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Host terminated unexpectedly");
+            throw;
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
 
-try
-{
-    Log.Information("Starting Miles Car Rental Search API");
+    private static void ConfigureLogging(WebApplicationBuilder builder)
+    {
+        var seqUrl = builder.Configuration["Seq:ServerUrl"]
+                    ?? Environment.GetEnvironmentVariable("SEQ_URL")
+                    ?? throw new InvalidOperationException("Seq log connection not found.");
 
-    // Configure the HTTP request pipeline.
-    app.UseSwagger();
-    app.UseSwaggerUI();
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Configuration)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.Seq(seqUrl)
+            .CreateLogger();
 
-    app.UseHttpsRedirection();
+        builder.Host.UseSerilog();
+    }
 
-    // Add a root endpoint
-    app.MapGet("/", () => "Miles Car Rental Search API")
-        .WithName("Root")
-        .WithOpenApi();
+    private static void ConfigureServices(WebApplicationBuilder builder)
+    {
+        // API and Documentation
+        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
 
-    // Add controllers
-    app.MapControllers();
+        // Database
+        ConfigureDatabase(builder);
 
-    // Seed the database
-    await DbSeeder.SeedData(app.Services);
+        // Redis Cache
+        ConfigureCache(builder);
 
-    app.Run();
-}
-catch (Exception ex)
-{
-    Log.Fatal(ex, "Host terminated unexpectedly");
-}
-finally
-{
-    Log.CloseAndFlush();
+        // Application Services
+        ConfigureApplicationServices(builder);
+    }
+
+    private static void ConfigureDatabase(WebApplicationBuilder builder)
+    {
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseNpgsql(connectionString));
+    }
+
+    private static void ConfigureCache(WebApplicationBuilder builder)
+    {
+        var redisConnection = builder.Configuration.GetConnectionString("Redis") 
+            ?? throw new InvalidOperationException("Connection string 'Redis' not found.");
+
+        builder.Services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisConnection;
+            options.InstanceName = "MilesCarRental_";
+        });
+    }
+
+    private static void ConfigureApplicationServices(WebApplicationBuilder builder)
+    {
+        // Repositories
+        builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+        builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+
+        // Application Services
+        builder.Services.AddScoped<IVehicleSearchService, VehicleSearchService>();
+    }
+
+    private static async Task ConfigureApplication(WebApplication app)
+    {
+        Log.Information("Starting Miles Car Rental Search API");
+
+        // API Documentation
+        app.UseSwagger();
+        app.UseSwaggerUI();
+
+        // Security
+        app.UseHttpsRedirection();
+
+        // Routing root endpoint
+        app.MapGet("/", () => "Miles Car Rental Search API")
+            .WithName("Root")
+            .WithOpenApi();
+        
+        app.MapControllers();
+
+        // Database Initialization
+        await DbSeeder.SeedData(app.Services);
+
+        await app.RunAsync();
+    }
 }
